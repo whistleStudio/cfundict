@@ -1,0 +1,40 @@
+	.headbar {
+		width: 100%;
+		height: 100rpx;
+		// background-color: yellow;
+		padding: 15rpx;
+		box-sizing: border-box;
+		>view {
+			width: 100%;
+			height: 100%;
+			>view {
+				height: 100%;
+			}
+
+		}
+		.default {
+			view {
+				line-height: 70rpx;
+				font-size: 40rpx;
+				text-align: center;
+				color: $gray50;
+				&:first-of-type {
+					width: 80rpx;
+					margin-right: 20rpx;
+					font-weight: bold;
+				}
+				&:nth-of-type(2) {
+					width: 85rpx;
+					height: 70rpx;
+					background: url("@/static/logo.png") center/contain no-repeat;
+				}
+				&:last-of-type {
+					margin-left: auto;
+					width: 70rpx;
+					height: 70rpx;
+					background-color: rgba(0,0,0,0.2);
+					border-radius: 50%;
+				}
+			};
+		}
+	}
