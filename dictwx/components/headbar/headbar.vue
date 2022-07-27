@@ -21,16 +21,21 @@
 	import {reactive, toRefs} from "vue"
 	export default {
 		name:"headbar",
-		setup () {
-			let pageState = reactive({
+		emits: ["pop"],
+		setup (props, context) {
+			let headbarState = reactive({
 				mode: 0
 			})
 			let searchInfo = reactive({
 				keyword: ""
 			})
+			function pop () {
+				context.emit("pop")
+			}
 			return {
-				...toRefs(pageState),
-				...toRefs(searchInfo)
+				...toRefs(headbarState),
+				...toRefs(searchInfo),
+				pop
 			}
 		},
 	}
