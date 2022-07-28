@@ -1,0 +1,1 @@
+<view class="content"><headbar bindpop="{{a}}" u-i="799f2a4a-0" bind:__l="__l"></headbar><view class="main"></view></view>

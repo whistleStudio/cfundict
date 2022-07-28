@@ -12,6 +12,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-liulanqi:before {
+  content: "\e605";
+}
+
+.icon-sanjiaoxia:before {
+  content: "\e6ec";
+}
+
+.icon-sanjiaoyou:before {
+  content: "\e6ed";
+}
+
+.icon-a-fenxianglianjie:before {
+  content: "\e637";
+}
+
+.icon-tuichu:before {
+  content: "\e645";
+}
+
 .icon-quxiao:before {
   content: "\e621";
 }
