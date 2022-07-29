@@ -1,1 +1,6 @@
-{}
+{
+  "dependencies": {
+    "md-editor-v3": "^2.2.1",
+    "mitt": "^3.0.0"
+  }
+}

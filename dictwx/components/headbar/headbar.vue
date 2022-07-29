@@ -20,12 +20,13 @@
 </template>
 
 <script>
-	import {reactive, toRefs} from "vue"
+	import {reactive, toRefs, getCurrentInstance} from "vue"
 	export default {
 		name:"headbar",
 		emits: ["pop"],
 		
 		setup (props, context) {
+			const {proxy} = getCurrentInstance()
 			let headbarState = reactive({
 				mode: 0
 			})
@@ -33,7 +34,7 @@
 				keyword: ""
 			})
 			function pop () {
-				context.emit("pop")
+				proxy.$bus.emit("pop")
 			}
 			return {
 				...toRefs(headbarState),
