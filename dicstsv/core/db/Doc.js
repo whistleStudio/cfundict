@@ -2,8 +2,9 @@ const mongoose = require('mongoose')
 
 const docSchema = new mongoose.Schema({
   title: String,
+  sub: {type: Number, default: 0},
   cate: Number,
-  docid: Number,
+  item: Number,
   keyword: String,
   src: String,
   regDate: {type: Date, default: new Date()},

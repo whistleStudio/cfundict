@@ -14,6 +14,28 @@ function makeMap(str, expectsLowerCase) {
   }
   return expectsLowerCase ? (val) => !!map[val.toLowerCase()] : (val) => !!map[val];
 }
+const toDisplayString = (val) => {
+  return isString(val) ? val : val == null ? "" : isArray(val) || isObject(val) && (val.toString === objectToString || !isFunction(val.toString)) ? JSON.stringify(val, replacer, 2) : String(val);
+};
+const replacer = (_key, val) => {
+  if (val && val.__v_isRef) {
+    return replacer(_key, val.value);
+  } else if (isMap(val)) {
+    return {
+      [`Map(${val.size})`]: [...val.entries()].reduce((entries, [key, val2]) => {
+        entries[`${key} =>`] = val2;
+        return entries;
+      }, {})
+    };
+  } else if (isSet(val)) {
+    return {
+      [`Set(${val.size})`]: [...val.values()]
+    };
+  } else if (isObject(val) && !isArray(val) && !isPlainObject(val)) {
+    return String(val);
+  }
+  return val;
+};
 const EMPTY_OBJ = Object.freeze({});
 const EMPTY_ARR = Object.freeze([]);
 const NOOP = () => {
@@ -399,9 +421,9 @@ function assertType$1(value, type) {
   let valid;
   const expectedType = getType$1(type);
   if (isSimpleType$1(expectedType)) {
-    const t = typeof value;
-    valid = t === expectedType.toLowerCase();
-    if (!valid && t === "object") {
+    const t2 = typeof value;
+    valid = t2 === expectedType.toLowerCase();
+    if (!valid && t2 === "object") {
       valid = value instanceof type;
     }
   } else if (expectedType === "Object") {
@@ -905,12 +927,17 @@ function invokePushCallback(args) {
     cidErrMsg = args.errMsg;
     invokeGetPushCidCallbacks(cid, args.errMsg);
   } else if (args.type === "pushMsg") {
-    onPushMessageCallbacks.forEach((callback) => {
-      callback({
-        type: "receive",
-        data: normalizePushMessage(args.message)
-      });
-    });
+    const message = {
+      type: "receive",
+      data: normalizePushMessage(args.message)
+    };
+    for (let i = 0; i < onPushMessageCallbacks.length; i++) {
+      const callback = onPushMessageCallbacks[i];
+      callback(message);
+      if (message.stopped) {
+        break;
+      }
+    }
   } else if (args.type === "click") {
     onPushMessageCallbacks.forEach((callback) => {
       callback({
@@ -963,7 +990,7 @@ const offPushMessage = (fn) => {
     }
   }
 };
-const SYNC_API_RE = /^\$|getLocale|setLocale|sendNativeEvent|restoreGlobal|requireGlobal|getCurrentSubNVue|getMenuButtonBoundingClientRect|^report|interceptors|Interceptor$|getSubNVueById|requireNativePlugin|upx2px|hideKeyboard|canIUse|^create|Sync$|Manager$|base64ToArrayBuffer|arrayBufferToBase64|getDeviceInfo|getAppBaseInfo|getWindowInfo/;
+const SYNC_API_RE = /^\$|getLocale|setLocale|sendNativeEvent|restoreGlobal|requireGlobal|getCurrentSubNVue|getMenuButtonBoundingClientRect|^report|interceptors|Interceptor$|getSubNVueById|requireNativePlugin|upx2px|hideKeyboard|canIUse|^create|Sync$|Manager$|base64ToArrayBuffer|arrayBufferToBase64|getDeviceInfo|getAppBaseInfo|getWindowInfo|getSystemSetting|getAppAuthorizeSetting/;
 const CONTEXT_API_RE = /^create|Manager$/;
 const CONTEXT_API_RE_EXC = ["createBLEConnection"];
 const ASYNC_API = ["createBLEConnection"];
@@ -1220,8 +1247,8 @@ function populateParameters(fromRes, toRes) {
     appVersion: "1.0.0",
     appVersionCode: "100",
     appLanguage: getAppLanguage(hostLanguage),
-    uniCompileVersion: "3.4.18",
-    uniRuntimeVersion: "3.4.18",
+    uniCompileVersion: "3.5.3",
+    uniRuntimeVersion: "3.5.3",
     uniPlatform: "mp-weixin",
     deviceBrand,
     deviceModel: model,
@@ -1375,6 +1402,17 @@ const getWindowInfo = {
     }));
   }
 };
+const getAppAuthorizeSetting = {
+  returnValue: function(fromRes, toRes) {
+    const { locationReducedAccuracy } = fromRes;
+    toRes.locationAccuracy = "unsupported";
+    if (locationReducedAccuracy === true) {
+      toRes.locationAccuracy = "reduced";
+    } else if (locationReducedAccuracy === false) {
+      toRes.locationAccuracy = "full";
+    }
+  }
+};
 const mocks$1 = ["__route__", "__wxExparserNodeId__", "__wxWebviewId__"];
 const getProvider = initGetProvider({
   oauth: ["weixin"],
@@ -1411,7 +1449,8 @@ var protocols = /* @__PURE__ */ Object.freeze({
   showActionSheet,
   getDeviceInfo,
   getAppBaseInfo,
-  getWindowInfo
+  getWindowInfo,
+  getAppAuthorizeSetting
 });
 var index = initUni(shims, protocols);
 function warn(msg, ...args) {
@@ -2550,8 +2589,8 @@ let currentFlushPromise = null;
 let currentPreFlushParentJob = null;
 const RECURSION_LIMIT = 100;
 function nextTick(fn) {
-  const p = currentFlushPromise || resolvedPromise;
-  return fn ? p.then(this ? fn.bind(this) : fn) : p;
+  const p2 = currentFlushPromise || resolvedPromise;
+  return fn ? p2.then(this ? fn.bind(this) : fn) : p2;
 }
 function findInsertionIndex(id) {
   let start = flushIndex + 1;
@@ -2579,12 +2618,14 @@ function queueFlush() {
     currentFlushPromise = resolvedPromise.then(flushJobs);
   }
 }
+function hasQueueJob(job) {
+  return queue.indexOf(job) > -1;
+}
 function invalidateJob(job) {
   const i = queue.indexOf(job);
   if (i > flushIndex) {
     queue.splice(i, 1);
   }
-  return i;
 }
 function queueCb(cb, activeQueue, pendingQueue, index2) {
   if (!isArray(cb)) {
@@ -2945,7 +2986,13 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = EM
   } else if (flush === "post") {
     scheduler = () => queuePostRenderEffect(job, instance && instance.suspense);
   } else {
-    scheduler = () => queuePreFlushCb(job);
+    scheduler = () => {
+      if (!instance || instance.isMounted) {
+        queuePreFlushCb(job);
+      } else {
+        job();
+      }
+    };
   }
   const effect = new ReactiveEffect(getter, scheduler);
   {
@@ -3925,7 +3972,7 @@ function isSameType(a, b) {
 }
 function getTypeIndex(type, expectedTypes) {
   if (isArray(expectedTypes)) {
-    return expectedTypes.findIndex((t) => isSameType(t, type));
+    return expectedTypes.findIndex((t2) => isSameType(t2, type));
   } else if (isFunction(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1;
   }
@@ -3973,9 +4020,9 @@ function assertType(value, type) {
   let valid;
   const expectedType = getType(type);
   if (isSimpleType(expectedType)) {
-    const t = typeof value;
-    valid = t === expectedType.toLowerCase();
-    if (!valid && t === "object") {
+    const t2 = typeof value;
+    valid = t2 === expectedType.toLowerCase();
+    if (!valid && t2 === "object") {
       valid = value instanceof type;
     }
   } else if (expectedType === "Object") {
@@ -4140,6 +4187,12 @@ function createAppAPI(render, hydrate) {
 const queuePostRenderEffect = queuePostFlushCb;
 function isVNode(value) {
   return value ? value.__v_isVNode === true : false;
+}
+const InternalObjectKey = `__vInternal`;
+function guardReactiveProps(props) {
+  if (!props)
+    return null;
+  return isProxy(props) || InternalObjectKey in props ? extend({}, props) : props;
 }
 const emptyAppContext = createAppContext();
 let uid$1 = 0;
@@ -4639,9 +4692,25 @@ function setRef$1(instance, isUnmount = false) {
   if (isUnmount) {
     return $templateRefs.forEach((templateRef) => setTemplateRef(templateRef, null, setupState));
   }
-  const doSet = () => {
+  const check = $mpPlatform === "mp-baidu" || $mpPlatform === "mp-toutiao";
+  const doSetByRefs = (refs) => {
     const mpComponents = $scope.selectAllComponents(".r").concat($scope.selectAllComponents(".r-i-f"));
-    $templateRefs.forEach((templateRef) => setTemplateRef(templateRef, findComponentPublicInstance(mpComponents, templateRef.i), setupState));
+    return refs.filter((templateRef) => {
+      const refValue = findComponentPublicInstance(mpComponents, templateRef.i);
+      if (check && refValue === null) {
+        return true;
+      }
+      setTemplateRef(templateRef, refValue, setupState);
+      return false;
+    });
+  };
+  const doSet = () => {
+    const refs = doSetByRefs($templateRefs);
+    if (refs.length && instance.proxy && instance.proxy.$scope) {
+      instance.proxy.$scope.setData({ r1: 1 }, () => {
+        doSetByRefs(refs);
+      });
+    }
   };
   if ($scope._$setRef) {
     $scope._$setRef(doSet);
@@ -4657,14 +4726,14 @@ function findComponentPublicInstance(mpComponents, id) {
   }
   return null;
 }
-function setTemplateRef({ r, f }, refValue, setupState) {
+function setTemplateRef({ r, f: f2 }, refValue, setupState) {
   if (isFunction(r)) {
     r(refValue, {});
   } else {
     const _isString = isString(r);
     const _isRef = isRef(r);
     if (_isString || _isRef) {
-      if (f) {
+      if (f2) {
         if (!_isRef) {
           return;
         }
@@ -5035,6 +5104,11 @@ function initApp(app) {
   }
 }
 const propsCaches = /* @__PURE__ */ Object.create(null);
+function renderProps(props) {
+  const { uid: uid2, __counter } = getCurrentInstance();
+  const propsId = (propsCaches[uid2] || (propsCaches[uid2] = [])).push(guardReactiveProps(props)) - 1;
+  return uid2 + "," + propsId + "," + __counter;
+}
 function pruneComponentPropsCache(uid2) {
   delete propsCaches[uid2];
 }
@@ -5159,8 +5233,48 @@ function patchStopImmediatePropagation(e2, value) {
     return value;
   }
 }
+function vFor(source, renderItem) {
+  let ret;
+  if (isArray(source) || isString(source)) {
+    ret = new Array(source.length);
+    for (let i = 0, l = source.length; i < l; i++) {
+      ret[i] = renderItem(source[i], i, i);
+    }
+  } else if (typeof source === "number") {
+    if (!Number.isInteger(source)) {
+      warn$1(`The v-for range expect an integer value but got ${source}.`);
+      return [];
+    }
+    ret = new Array(source);
+    for (let i = 0; i < source; i++) {
+      ret[i] = renderItem(i + 1, i, i);
+    }
+  } else if (isObject(source)) {
+    if (source[Symbol.iterator]) {
+      ret = Array.from(source, (item, i) => renderItem(item, i, i));
+    } else {
+      const keys = Object.keys(source);
+      ret = new Array(keys.length);
+      for (let i = 0, l = keys.length; i < l; i++) {
+        const key = keys[i];
+        ret[i] = renderItem(source[key], key, i);
+      }
+    }
+  } else {
+    ret = [];
+  }
+  return ret;
+}
+function setRef(ref2, id, opts = {}) {
+  const { $templateRefs } = getCurrentInstance();
+  $templateRefs.push({ i: id, r: ref2, k: opts.k, f: opts.f });
+}
 const o = (value, key) => vOn(value, key);
+const f = (source, renderItem) => vFor(source, renderItem);
 const e = (target, ...sources) => extend(target, ...sources);
+const t = (val) => toDisplayString(val);
+const p = (props) => renderProps(props);
+const sr = (ref2, id, opts) => setRef(ref2, id, opts);
 function createApp$1(rootComponent, rootProps = null) {
   rootComponent && (rootComponent.mpType = "app");
   return createVueApp(rootComponent, rootProps).use(plugin);
@@ -5541,11 +5655,27 @@ function initDefaultProps(isBehavior = false) {
   }
   return properties;
 }
+function initVirtualHostProps(options) {
+  const properties = {};
+  {
+    if (options && options.virtualHost) {
+      properties.virtualHostStyle = {
+        type: null,
+        value: ""
+      };
+      properties.virtualHostClass = {
+        type: null,
+        value: ""
+      };
+    }
+  }
+  return properties;
+}
 function initProps(mpComponentOptions) {
   if (!mpComponentOptions.properties) {
     mpComponentOptions.properties = {};
   }
-  extend(mpComponentOptions.properties, initDefaultProps());
+  extend(mpComponentOptions.properties, initDefaultProps(), initVirtualHostProps(mpComponentOptions.options));
 }
 const PROP_TYPES = [String, Number, Boolean, Object, Array, null];
 function parsePropType(type, defaultValue) {
@@ -5636,7 +5766,9 @@ function updateComponentProps(up, instance) {
   const nextProps = findComponentPropsData(up) || {};
   if (hasPropsChanged(prevProps, nextProps)) {
     updateProps(instance, nextProps, prevProps, false);
-    invalidateJob(instance.update);
+    if (hasQueueJob(instance.update)) {
+      invalidateJob(instance.update);
+    }
     {
       instance.update();
     }
@@ -5904,12 +6036,36 @@ const createSubpackageApp = initCreateSubpackageApp();
   wx.createPluginApp = global.createPluginApp = createPluginApp;
   wx.createSubpackageApp = global.createSubpackageApp = createSubpackageApp;
 }
+function mitt(n) {
+  return { all: n = n || /* @__PURE__ */ new Map(), on: function(t2, e2) {
+    var i = n.get(t2);
+    i ? i.push(e2) : n.set(t2, [e2]);
+  }, off: function(t2, e2) {
+    var i = n.get(t2);
+    i && (e2 ? i.splice(i.indexOf(e2) >>> 0, 1) : n.set(t2, []));
+  }, emit: function(t2, e2) {
+    var i = n.get(t2);
+    i && i.slice().map(function(n2) {
+      n2(e2);
+    }), (i = n.get("*")) && i.slice().map(function(n2) {
+      n2(t2, e2);
+    });
+  } };
+}
 exports._export_sfc = _export_sfc;
 exports.createSSRApp = createSSRApp;
 exports.e = e;
+exports.f = f;
+exports.getCurrentInstance = getCurrentInstance;
+exports.index = index;
+exports.mitt = mitt;
 exports.o = o;
+exports.onBeforeMount = onBeforeMount;
 exports.onMounted = onMounted;
+exports.p = p;
 exports.reactive = reactive;
 exports.ref = ref;
 exports.resolveComponent = resolveComponent;
+exports.sr = sr;
+exports.t = t;
 exports.toRefs = toRefs;

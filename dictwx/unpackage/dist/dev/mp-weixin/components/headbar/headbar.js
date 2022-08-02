@@ -23,6 +23,7 @@ const _sfc_main = {
   name: "headbar",
   emits: ["pop"],
   setup(props, context) {
+    const { proxy } = common_vendor.getCurrentInstance();
     let headbarState = common_vendor.reactive({
       mode: 0
     });
@@ -30,7 +31,7 @@ const _sfc_main = {
       keyword: ""
     });
     function pop() {
-      context.emit("pop");
+      proxy.$bus.emit("pop");
     }
     return __spreadProps(__spreadValues(__spreadValues({}, common_vendor.toRefs(headbarState)), common_vendor.toRefs(searchInfo)), {
       pop

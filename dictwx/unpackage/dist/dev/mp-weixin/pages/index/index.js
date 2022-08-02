@@ -19,41 +19,66 @@ var __spreadValues = (a, b) => {
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var common_vendor = require("../../common/vendor.js");
+var utils_netReq = require("../../utils/netReq.js");
+var utils_hint = require("../../utils/hint.js");
 const _sfc_main = {
   setup() {
-    const popup = common_vendor.ref(null);
     let indexState = common_vendor.reactive({
-      cateMode: 0
+      cateMode: 0,
+      mainSrc: "",
+      cateInfo: []
     });
-    function pop() {
-      indexState.cateMode = !indexState.cateMode;
-      if (indexState.cateMode)
-        popup._value.open();
-      else
-        popup._value.close();
+    const { $reqGet } = utils_netReq.netReq;
+    function changeMain(src) {
+      indexState.mainSrc = src;
     }
-    common_vendor.onMounted(() => {
-      console.log(popup._value);
+    common_vendor.onBeforeMount(() => {
+      $reqGet({
+        url: "/page/home",
+        rsv(data) {
+          if (!data.err) {
+            console.log(data.src);
+            indexState.mainSrc = data.src;
+          } else
+            utils_hint.hint.error(data.msg);
+        }
+      });
+      $reqGet({
+        url: "/page/getCate",
+        rsv(data) {
+          if (!data.err) {
+            indexState.cateInfo = data.cateInfo;
+          } else
+            utils_hint.hint.error(data.msg);
+        }
+      });
     });
-    return __spreadProps(__spreadValues({
-      popup
-    }, common_vendor.toRefs(indexState)), {
-      pop
+    return __spreadProps(__spreadValues({}, common_vendor.toRefs(indexState)), {
+      changeMain
     });
   }
 };
 if (!Array) {
   const _easycom_headbar2 = common_vendor.resolveComponent("headbar");
-  _easycom_headbar2();
+  const _easycom_category2 = common_vendor.resolveComponent("category");
+  (_easycom_headbar2 + _easycom_category2)();
 }
 const _easycom_headbar = () => "../../components/headbar/headbar.js";
+const _easycom_category = () => "../../components/category/category.js";
 if (!Math) {
-  _easycom_headbar();
+  (_easycom_headbar + _easycom_category)();
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return {
-    a: common_vendor.o($setup.pop)
-  };
+  return common_vendor.e({
+    a: _ctx.mainSrc
+  }, _ctx.mainSrc ? {
+    b: _ctx.mainSrc
+  } : {}, {
+    c: common_vendor.o($setup.changeMain),
+    d: common_vendor.p({
+      cateInfo: _ctx.cateInfo
+    })
+  });
 }
 var MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "D:/43542/Documents/WorkSpace/CFun World/j. \u7F51\u7AD9/cfundict/dictwx/pages/index/index.vue"]]);
 wx.createPage(MiniProgramPage);

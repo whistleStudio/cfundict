@@ -23,15 +23,52 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
-.content {
-  width: 100%;
-  height: 100vh;
+.drawer-title {
+  height: 80rpx;
+  border-bottom: 1px solid #f0f0f0;
+  box-sizing: border-box;
 }
-.content .main {
-  width: 100%;
-  height: 100%;
+.drawer-title text {
+  float: right;
+  display: inline-block;
+  width: 100rpx;
+  text-align: center;
+  line-height: 80rpx;
+  font-size: 45rpx;
+  color: #4dc7f1;
 }
-.content .main > iframe {
-  width: 100%;
-  height: 100%;
+.drawer-content {
+  padding: 30rpx;
+  color: #505050;
+  box-sizing: border-box;
+}
+.drawer-content .sub-ul .sub {
+  margin-bottom: 30rpx;
+}
+.drawer-content .sub-ul .sub > text {
+  display: inline-block;
+  font-size: 35rpx;
+  width: 150rpx;
+}
+.drawer-content .sub-ul .sub .cate {
+  padding-left: 35rpx;
+}
+.drawer-content .sub-ul .sub .cate > text {
+  font-size: 32rpx;
+}
+.drawer-content .sub-ul .sub .cate > ul {
+  margin: 15rpx 0;
+}
+.drawer-content .sub-ul .sub .cate > ul .item {
+  color: #646464;
+  margin-bottom: 10rpx;
+  padding-left: 35rpx;
+  font-size: 32rpx;
+}
+.drawer-content .tri {
+  color: #969696 !important;
+  font-size: 42rpx;
+}
+.drawer-content .sub-active {
+  color: #4dc7f1;
 }

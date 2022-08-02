@@ -1,5 +1,9 @@
 // #ifdef H5
-const BASEURL = "/api"
+var BASEURL = '/api'
+// #endif
+
+// #ifndef H5
+var BASEURL = "http://localhost:8989/api" 
 // #endif
 
 const netReq = {

@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "创趣百科",
   "usingComponents": {
-    "headbar": "../../components/headbar/headbar"
+    "headbar": "../../components/headbar/headbar",
+    "category": "../../components/category/category"
   }
 }

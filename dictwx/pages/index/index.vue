@@ -3,9 +3,10 @@
 		<headbar></headbar>
 		<view class="main">
 			<!-- <iframe src="/static/data/CF-Board-A主控板/CF-Board-A主控板.html" frameborder="0"></iframe> -->
-			<iframe v-if="mainSrc" :src="mainSrc" frameborder="0"></iframe>
+			<!-- <iframe v-if="mainSrc" :src="mainSrc" frameborder="0"></iframe> -->
+			<web-view  class="webview" v-if="mainSrc" :src="mainSrc"></web-view>
 		</view>
-		<category></category>
+		<category @changeMain="changeMain" :cateInfo="cateInfo"></category>
 	</view>
 </template>
 
@@ -17,20 +18,13 @@
 		setup() {
 			let indexState = reactive({
 				cateMode: 0,
-				mainSrc: ""
+				mainSrc: "",
+				cateInfo: []
 			})
 			const {$reqGet} = netReq
-			/* 请求指定页数据 */
-			function getPage (sub, cate, item) {
-				$reqGet({
-					url: "/page/getPage",
-					query: {sub, cate, item},
-					rsv (data) {
-						if (!data.err) {
-							
-						} else hint.error(data.msg)
-					}
-				})
+			/* 改变main内容 */
+			function changeMain (src) {
+				indexState.mainSrc = src
 			}
 			/* 请求首页数据 */
 			onBeforeMount(()=>{
@@ -43,9 +37,18 @@
 						} else hint.error(data.msg)
 					}
 				})
+				$reqGet({
+					url: "/page/getCate",
+					rsv(data){
+						if (!data.err) {
+							indexState.cateInfo = data.cateInfo
+						} else hint.error(data.msg)
+					} 
+				})
 			})
 			return {
 				...toRefs(indexState),
+				changeMain
 			}
 		}
 	}
@@ -59,7 +62,6 @@
 		.main {
 			width: 100%;
 			height: 100%;
-			background-color: red;
 			>iframe {
 				width: 100%;
 				height: 100%;

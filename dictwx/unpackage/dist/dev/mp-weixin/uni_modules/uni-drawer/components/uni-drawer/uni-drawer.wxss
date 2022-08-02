@@ -23,25 +23,48 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
-.uni-popup {
-  position: fixed;
-  z-index: 99;
-}
-.uni-popup.top, .uni-popup.left, .uni-popup.right {
-  top: 0;
-}
-.uni-popup .uni-popup__wrapper {
+.uni-drawer.data-v-558f1882 {
   display: block;
-  position: relative;
-  /* iphonex 等安全区设置，底部安全区适配 */
-}
-.uni-popup .uni-popup__wrapper.left, .uni-popup .uni-popup__wrapper.right {
-  padding-top: 0;
-  flex: 1;
-}
-.fixforpc-z-index {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
   z-index: 999;
 }
-.fixforpc-top {
+.uni-drawer__content.data-v-558f1882 {
+  display: block;
+  position: absolute;
   top: 0;
+  width: 220px;
+  bottom: 0;
+  background-color: #ffffff;
+  transition: transform 0.3s ease;
+}
+.uni-drawer--left.data-v-558f1882 {
+  left: 0;
+  transform: translateX(-100%);
+}
+.uni-drawer--right.data-v-558f1882 {
+  right: 0;
+  transform: translateX(100%);
+}
+.uni-drawer__content--visible.data-v-558f1882 {
+  transform: translateX(0px);
+}
+.uni-drawer__mask.data-v-558f1882 {
+  display: block;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  transition: opacity 0.3s;
+}
+.uni-drawer__mask--visible.data-v-558f1882 {
+  display: block;
+  opacity: 1;
 }
