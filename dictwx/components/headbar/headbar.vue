@@ -4,26 +4,41 @@
 		<view v-if="mode==0" class="default flex-row-center">
 			<view @click="pop" class="iconfont icon-icon_mulu"></view>
 			<view></view>
-			<view @click="mode=1" class="iconfont icon-sousuo"></view>
+			<view @click="actSearch" class="iconfont icon-sousuo"></view>
 		</view>
 		<!-- 搜索 -->
 		<view v-else class="search flex-row-center">
 			<view>
-				<input v-model="keyword" type="text" placeholder="Search docs" placeholder-class="plh">
+				<input v-model="keyword" type="text" placeholder="Search docs" placeholder-class="plh" @input="inputSearch">
 				<text class="iconfont icon-sousuo"></text>
-				<text v-show="keyword" @click="keyword=''" 
+				<text v-show="keyword" @click="clearKeyword" 
 				class="iconfont icon-quxiao"></text>
 			</view>
-			<view @click="mode=0">Cancel</view>
+			<view @click="cancelSearch">Cancel</view>
 		</view>
+	</view>
+	<view v-show="mode==1" class="search-list">
+		<text>Search Result: <text v-if="!keyword || !searchList.length">None</text> </text>
+		<ul>
+			<li v-for="(v, i) in searchList" :key="i" @click="redirectPage(v.sub, v.cate, v.item)"> 
+				<text class="iconfont icon-a-fenxianglianjie"></text>
+				<text>{{v.title}}</text> 
+				<ul class="kword">
+					<li v-for="(cv, ci) in v.keyword.split('|')" :key="ci">{{cv}}</li>
+				</ul>
+			</li>
+		</ul>
 	</view>
 </template>
 
 <script>
 	import {reactive, toRefs, getCurrentInstance} from "vue"
+	import {searchThrottle} from "@/utils/throttle.js"
+	import {$reqGet, $hint} from "../../utils/netReq.js"
+	import useGetPage from "@/hooks/useGetPage.js"
 	export default {
 		name:"headbar",
-		emits: ["pop"],
+		emits: ["pop", "actSearch", "cancelSearch", "changeMain"],
 		
 		setup (props, context) {
 			const {proxy} = getCurrentInstance()
@@ -31,15 +46,50 @@
 				mode: 0
 			})
 			let searchInfo = reactive({
-				keyword: ""
+				keyword: "",
+				searchList: []
 			})
 			function pop () {
 				proxy.$bus.emit("pop")
 			}
-			return {
+			function actSearch () {
+				headbarState.mode = 1
+				context.emit("actSearch")
+			}
+			function cancelSearch () {
+				searchInfo.keyword = ""
+				searchInfo.searchList = []
+				context.emit("cancelSearch")
+				headbarState.mode = 0
+			}
+			function clearKeyword () {
+				searchInfo.keyword = ""
+				searchInfo.searchList = []
+			}
+			let inputSearch = searchThrottle(()=>{
+				console.log("😊search sth.")
+				$reqGet({
+					url: "/page/kwSearch",
+					query: {kw: searchInfo.keyword},
+					rsv (data) {
+						if (!data.err) {
+							searchInfo.searchList = data.searchList
+						} else {
+							searchInfo.searchList = []
+						}
+					}
+				})
+			})
+			const {getPage} = useGetPage(context)
+			function redirectPage (sub, cate, item) {
+				getPage(sub, cate, item)
+				cancelSearch()
+			}
+			
+ 			return {
 				...toRefs(headbarState),
 				...toRefs(searchInfo),
-				pop
+				pop,actSearch,cancelSearch, inputSearch, clearKeyword, redirectPage
 			}
 		},
 	}

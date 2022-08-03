@@ -1,4 +1,16 @@
-let a = []
-a[1] = {}
+{
+  let b = 1
+  function a (fn) {
+    return ()=>{
+      console.log(b)
+      fn(...arguments)
+    }
+  }
+}
 
-console.log(a<undefined)
+
+{
+  // let b = 2
+  let c = a(()=>{console.log(b)})
+  c()
+}

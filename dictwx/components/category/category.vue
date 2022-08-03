@@ -22,11 +22,10 @@
 </template>
 
 <script>
-	import {sub} from "@/static/data/category.json"
+	// import {sub} from "@/static/data/category.json"
 	import {ref, reactive, toRefs, onMounted, getCurrentInstance} from "vue"
-	import netReq from "../../utils/netReq.js"
-	import hint from "../../utils/hint.js"
-	
+	import {$reqGet, $hint} from "../../utils/netReq.js"
+	import useGetPage from "@/hooks/useGetPage.js"
 	
 	export default {
 		name:"category",
@@ -41,7 +40,6 @@
 			const cateState = reactive({
 				actIdx: [-1,0,0]
 			})
-			const {$reqGet} = netReq
 			function drawerOpen () {cateState.actIdx[0]=-1;drawer._value.open();}
 			function drawerClose () {drawer._value.close();}
 			function subClick (i) {
@@ -55,24 +53,14 @@
 				drawerClose()
 			}
 			/* 请求指定页数据 */
-			function getPage (sub, cate, item) {
-				$reqGet({
-					url: "/page/getPage",
-					query: {sub, cate, item},
-					rsv (data) {
-						if (!data.err) {
-							context.emit("changeMain", data.src)
-						} else hint.error(data.msg)
-					}
-				})
-			}
+			const {getPage} = useGetPage(context)
 			
 			onMounted(() => {
 				proxy.$bus.on("pop", drawerOpen)
 			});
 			
 			return {
-				drawer, sub,
+				drawer, 
 				drawerOpen, drawerClose, subClick, itemClick,
 				...toRefs(cateState)
 			}

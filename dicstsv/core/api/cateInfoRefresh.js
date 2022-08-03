@@ -28,7 +28,7 @@ let cateInfo = [
 
 try {
   ;(async () => {
-    let q = await Doc.find()
+    let q = await Doc.find().sort("sub cate item")
     q.forEach(e=> {
       let {sub, cate, item} = e
       if (sub<cateInfo.length && cate<cateInfo[sub]?.cate?.length) {

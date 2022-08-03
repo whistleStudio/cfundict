@@ -1,10 +1,10 @@
 <template>
 	<view class="content">
-		<headbar></headbar>
-		<view class="main">
+		<headbar @actSearch="isMainShow=false" @cancelSearch="isMainShow=true" @changeMain="changeMain"></headbar>
+		<view class="main" v-show="isMainShow">
 			<!-- <iframe src="/static/data/CF-Board-A主控板/CF-Board-A主控板.html" frameborder="0"></iframe> -->
-			<!-- <iframe v-if="mainSrc" :src="mainSrc" frameborder="0"></iframe> -->
-			<web-view  class="webview" v-if="mainSrc" :src="mainSrc"></web-view>
+			<iframe v-if="mainSrc" :src="mainSrc" frameborder="0"></iframe>
+			<!-- <web-view  class="webview" v-if="mainSrc" :src="mainSrc"></web-view> -->
 		</view>
 		<category @changeMain="changeMain" :cateInfo="cateInfo"></category>
 	</view>
@@ -12,16 +12,16 @@
 
 <script>
 	import {ref, reactive, toRefs, onBeforeMount} from "vue"
-	import netReq from "../../utils/netReq.js"
-	import hint from "../../utils/hint.js"
+	import {$reqGet, $hint} from "../../utils/netReq.js"
+
 	export default {
 		setup() {
 			let indexState = reactive({
 				cateMode: 0,
 				mainSrc: "",
-				cateInfo: []
+				cateInfo: [],
+				isMainShow: true
 			})
-			const {$reqGet} = netReq
 			/* 改变main内容 */
 			function changeMain (src) {
 				indexState.mainSrc = src
@@ -34,7 +34,7 @@
 						if (!data.err) {
 							console.log(data.src)
 							indexState.mainSrc = data.src
-						} else hint.error(data.msg)
+						} else $hint(data.msg)
 					}
 				})
 				$reqGet({

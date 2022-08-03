@@ -6,8 +6,7 @@ var BASEURL = '/api'
 var BASEURL = "http://localhost:8989/api" 
 // #endif
 
-const netReq = {
-	$reqGet ({url,query={},rsv=()=>{},rej=()=>{}}) {
+function $reqGet ({url,query={},rsv=()=>{},rej=()=>{}}) {
 	  uni.request({
 	  	url: BASEURL+url,
 	  	header:  {
@@ -26,6 +25,12 @@ const netReq = {
 	  	}
 		})
 	}
-}
 
-export default netReq
+function $hint (err, icon="error") {
+		uni.showToast({
+			title: err,
+			icon
+		})
+	}
+
+export {$reqGet, $hint}
