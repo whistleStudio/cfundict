@@ -3,13 +3,14 @@
 		<!-- 默认 -->
 		<view v-if="mode==0" class="default flex-row-center">
 			<view @click="pop" class="iconfont icon-icon_mulu"></view>
-			<view></view>
+			<view @click="goHome"></view>
 			<view @click="actSearch" class="iconfont icon-sousuo"></view>
 		</view>
 		<!-- 搜索 -->
 		<view v-else class="search flex-row-center">
 			<view>
-				<input v-model="keyword" type="text" placeholder="Search docs" placeholder-class="plh" @input="inputSearch">
+				<input v-model="keyword" type="text" placeholder="Search docs" placeholder-class="plh" 
+				@input="inputSearch" @confirm="inputConfirm">
 				<text class="iconfont icon-sousuo"></text>
 				<text v-show="keyword" @click="clearKeyword" 
 				class="iconfont icon-quxiao"></text>
@@ -38,7 +39,7 @@
 	import useGetPage from "@/hooks/useGetPage.js"
 	export default {
 		name:"headbar",
-		emits: ["pop", "actSearch", "cancelSearch", "changeMain"],
+		emits: ["pop", "actSearch", "cancelSearch", "changeMain", "goHome"],
 		
 		setup (props, context) {
 			const {proxy} = getCurrentInstance()
@@ -85,11 +86,20 @@
 				getPage(sub, cate, item)
 				cancelSearch()
 			}
+			function inputConfirm () {
+				let sL = searchInfo.searchList
+				if (sL.length) {
+					redirectPage(sL[0].sub, sL[0].cate, sL[0].item)
+				} else cancelSearch()
+			}
+			function goHome () {
+				context.emit("goHome")
+			}
 			
  			return {
 				...toRefs(headbarState),
 				...toRefs(searchInfo),
-				pop,actSearch,cancelSearch, inputSearch, clearKeyword, redirectPage
+				pop,actSearch,cancelSearch, inputSearch, clearKeyword, redirectPage, inputConfirm, goHome
 			}
 		},
 	}

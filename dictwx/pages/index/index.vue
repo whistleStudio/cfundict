@@ -1,6 +1,7 @@
 <template>
 	<view class="content">
-		<headbar @actSearch="isMainShow=false" @cancelSearch="isMainShow=true" @changeMain="changeMain"></headbar>
+		<headbar @actSearch="isMainShow=false" @cancelSearch="isMainShow=true" 
+		@changeMain="changeMain" @goHome="goHome"></headbar>
 		<view class="main" v-show="isMainShow">
 			<!-- <iframe src="/static/data/CF-Board-A主控板/CF-Board-A主控板.html" frameborder="0"></iframe> -->
 			<iframe v-if="mainSrc" :src="mainSrc" frameborder="0"></iframe>
@@ -26,17 +27,22 @@
 			function changeMain (src) {
 				indexState.mainSrc = src
 			}
-			/* 请求首页数据 */
-			onBeforeMount(()=>{
+			/* 回首页 */
+			function goHome () {
+				indexState.mainSrc = ""
 				$reqGet({
 					url: "/page/home",
 					rsv(data){
 						if (!data.err) {
-							console.log(data.src)
+							// console.log(data.src)
 							indexState.mainSrc = data.src
 						} else $hint(data.msg)
 					}
 				})
+			}
+			/* 请求首页数据 */
+			onBeforeMount(()=>{
+				goHome()
 				$reqGet({
 					url: "/page/getCate",
 					rsv(data){
@@ -48,7 +54,7 @@
 			})
 			return {
 				...toRefs(indexState),
-				changeMain
+				changeMain, goHome
 			}
 		}
 	}

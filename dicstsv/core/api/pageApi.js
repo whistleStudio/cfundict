@@ -4,17 +4,12 @@ const rt = express.Router()
 const Doc = require("../db/Doc")
 // const {cateInfo} = require("./cateInfo.json")
 const cateInfo = require("./cateInfoRefresh")
+const homepageUrl = "https://dict.cfunworld.com/img/public/home.html"
 
 rt.get("/home", (req, res) => {
   // console.log("--home--")
   try {
-    ;(async ()=> {
-      let q = await Doc.findOne({sub:0, cate:0, item:0}, "src")
-      if (q) {
-        let {src} = q
-        res.json({err:0, src})
-      } else res.json({err:1, msg:"文档查询失败"})
-    })()
+    res.json({err:0, src: homepageUrl})
   } catch(e){console.log(e);res.json({err:5})}
   
 })
