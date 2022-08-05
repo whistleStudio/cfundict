@@ -1,4 +1,4 @@
-function searchThrottle (fn, {inv=1500}={}) {
+function searchThrottle (fn, {inv=200}={}) {
 	let tim
 	return () => {
 		clearTimeout(tim)
