@@ -31,7 +31,7 @@
 			function goHome () {
 				indexState.mainSrc = ""
 				$reqGet({
-					url: "/page/home",
+					url: "/doc/home",
 					rsv(data){
 						if (!data.err) {
 							// console.log(data.src)
@@ -44,7 +44,7 @@
 			onBeforeMount(()=>{
 				goHome()
 				$reqGet({
-					url: "/page/getCate",
+					url: "/doc/getCate",
 					rsv(data){
 						if (!data.err) {
 							indexState.cateInfo = data.cateInfo

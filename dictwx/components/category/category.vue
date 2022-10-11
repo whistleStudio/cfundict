@@ -88,8 +88,14 @@
 		color: $gray80;
 		box-sizing: border-box;
 		.sub-ul {
+			&::after {
+				content: "";
+				height: 30rpx;
+				display: block;
+				box-sizing: border-box;
+			}
 			.sub {	
-				margin-bottom: 30rpx;
+				margin-bottom: 50rpx;
 				>text {
 					display: inline-block;
 					font-size: 35rpx;
@@ -106,7 +112,7 @@
 							color: $gray100;
 							margin-bottom: 10rpx;
 							padding-left: 35rpx;
-							font-size: 32rpx;
+							font-size: 29rpx;
 						}							
 					}
 				}

@@ -49,3 +49,16 @@ proxy.$bus.on("event", ()=>{})
 - 该采用H5
 
 v0 完成
+
+### [10111215]
+
+1 【调整】
+
+- client
+
+pageApi -> docApi; 目录样式微调
+
+- server 
+
+仅作为域名dictwx.cfunworld.com首页服务提供; nginx代理/api/ 请求 至cfweb后台
+

@@ -4,7 +4,7 @@ export default function (ctxt) {
 	/* 请求指定页数据 */
 	function getPage (sub, cate, item) {
 		$reqGet({
-			url: "/page/getPage",
+			url: "/doc/getPage",
 			query: {sub, cate, item},
 			rsv (data) {
 				if (!data.err) {

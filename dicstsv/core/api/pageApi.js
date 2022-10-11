@@ -1,3 +1,4 @@
+/* 已统一调用cfunweb docApi */
 const { query } = require("express")
 const express = require("express")
 const rt = express.Router()

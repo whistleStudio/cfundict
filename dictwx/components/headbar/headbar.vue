@@ -70,7 +70,7 @@
 			let inputSearch = searchThrottle(()=>{
 				console.log("😊search sth.")
 				$reqGet({
-					url: "/page/kwSearch",
+					url: "/doc/kwSearch",
 					query: {kw: searchInfo.keyword},
 					rsv (data) {
 						if (!data.err) {
